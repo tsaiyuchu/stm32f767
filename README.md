@@ -134,7 +134,7 @@ USE_FULL_LL_DRIVERS
   - 硬體流控可確保高速和穩定的數據傳輸，特別是在大數據量傳輸時。
 ## 5_Inter-Integrated Circuit (I2C)
 ![image](https://github.com/user-attachments/assets/1c266bd2-0132-4ce7-b9f8-809f3c77f2c1)
-1. THE PROTOCOL
+### 5.1 THE PROTOCOL
    I2C 是一種 **兩線接口**，SCL 和 SDA 是其核心，這也是名稱 "Two-Wire Interface" 的由來。
    它的設計允許多個主設備與從設備共享同一條總線。
    **I2C線路的組成**：
@@ -164,9 +164,9 @@ Slave Receiver：從設備作為接收方，接收來自主設備的數據。
 **數據的時序 (Data Timing)**：
    - 數據會在 **SCL (Serial Clock)** 線變低電平後放置到 **SDA (Serial Data)** 線上。
    - 數據會在 **SCL 線變高電平後被採樣**，這確保了數據的同步和正確性。
-2. START AND STOP CONDITION
+### 5.2 START AND STOP CONDITION
 ![image](https://github.com/user-attachments/assets/4b34932d-48c8-4a3c-aa62-a4e34bc7f7f4)
- **START AND STOP**：
+1. **START AND STOP**：
    - 所有 I2C 通訊以 **START 條件** 開始，並以 **STOP 條件** 結束。
 
 2. **START 條件**：
@@ -188,3 +188,104 @@ Slave Receiver：從設備作為接收方，接收來自主設備的數據。
 6. **數據傳輸格式**：
    - 一個完整的 I2C 通訊幀，包括 START、從設備地址 (Slave Address)、讀寫位 (R/W)、數據 (Data) 和 STOP。
 
+### 5.3 BYTE FORMAT
+![image](https://github.com/user-attachments/assets/29ca9447-629e-451b-a5b2-009863165c53)
+
+1. **數據長度**：
+   - 在 SDA 線上傳輸的任何信息必須是 **8位元 (8 bits)** 的長度。
+   - 每個字節代表傳輸數據的最小單位。
+
+2. **字節數量**：
+   - 每次傳輸中可以傳輸的字節數量是 **無限制的**，這使得 I2C 通訊靈活且適用於多種情境。
+
+3. **確認位元 (ACK)**：
+   - 每個字節之後，必須有一個 **確認位元 (ACK)**。
+   - ACK 用於表明接收方已正確接收到數據。
+
+4. **數據傳輸順序**：
+   - 數據以 **最高有效位 (MSB, Most Significant Bit)** 優先的方式傳輸。
+   - 這意味著數據的最左邊位元 (MSB) 先傳輸，然後依次到最低有效位 (LSB)。
+### 5.4 ADDRESS FRAME
+![image](https://github.com/user-attachments/assets/1fbadba3-258f-4365-87af-611074617f4d)
+1. **地址的重要性**：
+   - 地址是每次新通信序列的第一部分。
+   - 它用於指定要通信的從設備 (Slave)，從而確保數據傳輸的目標正確無誤。
+
+2. **7位地址格式**：
+   - I2C 使用 **7位地址** 來標識從設備。
+   - 地址以 **最高有效位 (MSB, Most Significant Bit)** 優先的方式傳輸。
+
+3. **R/W**：
+   - 地址幀的第8位是 **(R/W)**。
+   - **R/W 位值**：
+     - **1**：表示讀取操作 (Read)。
+     - **0**：表示寫入操作 (Write)。
+
+4. **確認位元 (ACK)**：
+   - 從設備在接收到完整的地址幀後，會返回一個 **確認位 (ACK)**。
+   - 如果從設備正確接收到地址幀，則拉低 SDA 線表示確認；否則，SDA 線保持高電平表示無回應。
+
+5. **解釋**：
+   - 起始條件 (Start)、地址位 (A6 至 A0)、讀/寫位 (R/W)，以及確認位 (ACK) 的時序在圖中清楚展示。
+### 5.5 DATA FRAME
+![image](https://github.com/user-attachments/assets/4607220b-8312-4751-a661-20179b828580)
+
+1. **數據幀的傳輸開始**：
+   - 數據幀的傳輸是在 **地址幀 (Address Frame)** 傳輸完成之後開始的。
+   - 地址幀結束後，從設備將確定數據是由主設備寫入還是從從設備讀取。
+
+2. **時鐘信號的生成**：
+   - 主設備會在 **SCL (Serial Clock)** 線上持續生成規律的時鐘脈衝。
+   - 數據根據時鐘信號進行同步傳輸。
+
+3. **數據的來源**：
+   - 數據由主設備或從設備通過 **SDA (Serial Data)** 線傳輸。
+   - 這取決於地址幀中的 **讀/寫位 (R/W)**：
+     - **0 (Write)**：主設備將數據發送給從設備。
+     - **1 (Read)**：從設備將數據發送給主設備。
+
+4. **數據長度**：
+   - 數據幀可以包含多個字節 (**n-bytes**)。
+   - 每個字節在傳輸後，接收方需要返回一個 **確認位 (ACK)**。
+
+5. **結束條件**：
+   - 數據幀的傳輸結束於 **停止條件 (Stop Condition)**，主設備生成停止信號以釋放總線。
+### 5.6 CLOCK SPEED
+![image](https://github.com/user-attachments/assets/b0167d0e-b15e-45d5-a5a2-af7c5874c9d7)
+
+1. **I2C 的CLOCK SPEED**：
+   - I2C 的速度是指總線通信的速度，由 **SCL (Serial Clock Line)** 訊號的頻率決定。
+   - 這個速度需要與 I2C 規範中定義的總線速度對應，以確保主從設備的正確通信。
+
+2. **規範中的模式和速度**：
+   - **Standard-mode**：
+     - 最大速度為 **100 kHz**。
+     - 適用於低速應用。
+   - **Fast-mode**：
+     - 最大速度為 **400 kHz**。
+     - 用於較高數據速率需求的應用。
+   - **Fast-mode Plus**：
+     - 最大速度為 **1 MHz**。
+     - 支援更快的數據傳輸。
+   - **High-speed mode**：
+     - 最大速度為 **3.4 MHz**。
+     - 用於極高速應用，例如video數據傳輸。
+### 5.7 duty cycle
+![image](https://github.com/user-attachments/assets/e858a4db-6320-4e44-a3a2-10bfe36f375c)
+
+1. **duty cycl的定義**：
+   - 占空比指的是 **SCL (Serial Clock Line)** 信號的低電平時間 (\(t_{LOW}\)) 與高電平時間 (\(t_{HIGH}\)) 之間的比率。
+
+2. **可選的duty cycl比值**：
+   - **I2C\_DUTYCYCLE\_2**:
+     - 比率為 **2:1**，即低電平時間是高電平時間的兩倍。
+   - **I2C\_DUTYCYCLE\_16\_9**:
+     - 比率為 **16:9**，即低電平與高電平的時間比例更接近。
+
+3. **影響**：
+   - 選擇適當的占空比可以影響 I2C 的總線速度，從而滿足不同的應用需求。
+   - 通過設置正確的占空比，可以預先縮放外設時鐘，實現所需的 I2C 通訊速度。
+
+4. **應用場景**：
+   - **2:1 占空比** 通常適用於標準模式和快速模式。
+   - **16:9 占空比** 更適合於高速模式，因為可以提供更高的數據速率。
