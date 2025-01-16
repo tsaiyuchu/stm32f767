@@ -1,9 +1,0 @@
-#Universal Asynchronous Receiver/Transmitter (UART)
-## USART_INTEERUPT
-只要 TXE 觸發就送 'E'，TC 觸發就送 'C'。
-沒有複雜的狀態轉換，不能輕易擴充一次傳多個字元 (除非再自行加INDEX、BUFFER)。
-## USART_INTEERUPT2
-設計一個「狀態機 (state machine)」來先送 "MEC\r\n"，之後再送 "AB"，結束後進入 STATE_DONE。
-適合「要分階段或傳送多組資料」的應用，可以做更多邏輯判斷
----
-
