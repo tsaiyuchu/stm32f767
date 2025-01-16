@@ -132,3 +132,59 @@ USE_FULL_LL_DRIVERS
   - 如果未啟用，流控由軟體協議（如 XON/XOFF）管理，效率較低。
 - **優點**：
   - 硬體流控可確保高速和穩定的數據傳輸，特別是在大數據量傳輸時。
+## 5_Inter-Integrated Circuit (I2C)
+![image](https://github.com/user-attachments/assets/1c266bd2-0132-4ce7-b9f8-809f3c77f2c1)
+1. THE PROTOCOL
+   I2C 是一種 **兩線接口**，SCL 和 SDA 是其核心，這也是名稱 "Two-Wire Interface" 的由來。
+   它的設計允許多個主設備與從設備共享同一條總線。
+   **I2C線路的組成**：
+   - **SCL (Serial Clock)**：
+     - 用於在主設備 (Master) 和從設備 (Slave) 之間同步數據傳輸的時鐘信號線。
+   - **SDA (Serial Data)**：
+     - 數據線，用於在設備之間進行實際數據的傳輸。
+
+   **電路圖**：
+   - 圖片中顯示了 **SDA** 和 **SCL** 兩條線，連接多個主設備和多個從設備。
+   - **Rp (Pull-up Resistors)**：
+     - SCL 和 SDA 線需要透過上拉電阻 (Rp) 連接到電源 (VDD) 以保持穩定的高電平。
+操作模式：
+Master Transmitter：主設備作為發送方，向從設備傳輸數據。
+Master Receiver：主設備作為接收方，從從設備接收數據。
+Slave Transmitter：從設備作為發送方，將數據傳輸給主設備。
+Slave Receiver：從設備作為接收方，接收來自主設備的數據。
+ **I2C 通訊協議 (The Protocol)** 的關鍵特性。以下是重點內容的解釋：
+
+**主設備控制交易 (Transactions)**：
+   - 所有的數據傳輸都是由主設備 (Master) 發起並完成的。主設備負責管理總線的使用權，開始和結束通信。
+
+**消息結構 (Message Structure)**：
+   - 每個消息 (Message) 包含兩個主要部分：
+     - **地址幀 (Address Frame)**：用於指定從設備的唯一地址。
+     - **數據幀 (Data Frame)**：傳輸具體數據的內容。
+**數據的時序 (Data Timing)**：
+   - 數據會在 **SCL (Serial Clock)** 線變低電平後放置到 **SDA (Serial Data)** 線上。
+   - 數據會在 **SCL 線變高電平後被採樣**，這確保了數據的同步和正確性。
+2. START AND STOP CONDITION
+![image](https://github.com/user-attachments/assets/4b34932d-48c8-4a3c-aa62-a4e34bc7f7f4)
+ **START AND STOP**：
+   - 所有 I2C 通訊以 **START 條件** 開始，並以 **STOP 條件** 結束。
+
+2. **START 條件**：
+   - 當 **SCL 線維持高電平** 時，**SDA 線從高電平轉為低電平**，這定義為 START 條件。
+   - 這是一個信號，表明主設備準備開始通信。
+
+3. **STOP 條件**：
+   - 當 **SCL 線維持高電平** 時，**SDA 線從低電平轉為高電平**，這定義為 STOP 條件。
+   - 這是一個信號，表明主設備結束了當前的通信。
+
+4. **主設備的控制**：
+   - START 和 STOP 條件始終由主設備產生。
+   - 當 STOP 條件發生後，總線會在一定時間後被視為空閒。
+
+5. **總線狀態**：
+   - 如果在 STOP 條件之前產生了另一個 START 條件，則總線會保持忙碌狀態。
+   - 這種情況被稱為 **重複 START (Repeated START)**，用於連續交易而不釋放總線。
+
+6. **數據傳輸格式**：
+   - 一個完整的 I2C 通訊幀，包括 START、從設備地址 (Slave Address)、讀寫位 (R/W)、數據 (Data) 和 STOP。
+
